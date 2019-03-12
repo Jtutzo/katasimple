@@ -68,6 +68,7 @@ class AxonConfig {
 
     @Bean
     fun eventSchema(): EventSchema = EventSchema.builder()
+            .snapshotTable("snapshot_event_entry")
             .eventTable("domain_event_entry")
             .globalIndexColumn("global_index")
             .eventIdentifierColumn("event_identifier")
@@ -95,12 +96,6 @@ class AxonConfig {
         sagaIdColumn = "saga_id"
         sagaTypeColumn = "saga_type"
         serializedSagaColumn = "serialized_saga"
-    }
-
-    @Autowired
-    fun createAxonSchema(eventStorageEngine: EventStorageEngine, tokenStore: TokenStore) {
-        (eventStorageEngine as JdbcEventStorageEngine).createSchema(HsqlEventTableFactory.INSTANCE)
-        (tokenStore as JdbcTokenStore).createSchema(GenericTokenTableFactory())
     }
 
 }

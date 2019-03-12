@@ -37,7 +37,7 @@ class UserWriteRepositoryTest {
         flyway.migrate()
         userReadRepository = JooqUserReadRepository(dsl)
         userWriteRepository = JooqUserWriteRepository(dsl)
-        testService = TestService(userWriteRepository, userReadRepository)
+        testService = TestService(userWriteRepository)
     }
 
     @After
