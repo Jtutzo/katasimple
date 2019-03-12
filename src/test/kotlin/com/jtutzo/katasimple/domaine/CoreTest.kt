@@ -1,10 +1,6 @@
 package com.jtutzo.katasimple.domaine
 
-import com.jtutzo.katasimple.util.UserTestData.Companion.USER1
-import com.jtutzo.katasimple.util.UserTestData.Companion.USER2
-import com.jtutzo.katasimple.util.buildCreateUserCmd
-import com.jtutzo.katasimple.util.buildUpdateUserCmd
-import com.jtutzo.katasimple.util.buildUserProject
+import com.jtutzo.katasimple.util.*
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.axonframework.test.aggregate.AggregateTestFixture
@@ -27,7 +23,7 @@ class UserTest {
     private lateinit var helperUserHelper: UserHelper
 
     @Before
-    fun init() {
+    fun setup() {
         MockitoAnnotations.initMocks(this)
         fixture = AggregateTestFixture<User>(User::class.java)
         fixture.registerInjectableResource(helperUserHelper)
@@ -36,7 +32,7 @@ class UserTest {
     @Test
     fun `should create user`() {
         // Given
-        val createUserCmd = USER1.buildCreateUserCmd()
+        val createUserCmd = jeremyTutzo().toCreateUserCmd()
         doNothing().`when`(helperUserHelper).throwIfUsernameIsUsedByOtherUser(createUserCmd.id, createUserCmd.username)
 
         // Then / When
@@ -56,7 +52,7 @@ class UserTest {
     @Test
     fun `shouldn't create user when username is already used by other user`() {
         // Given
-        val createUserCmd = USER1.buildCreateUserCmd()
+        val createUserCmd = jeremyTutzo().toCreateUserCmd()
         `when`(helperUserHelper.throwIfUsernameIsUsedByOtherUser(createUserCmd.id, createUserCmd.username)).thenThrow(UsernameAlreadyUsed())
 
         // Then / When
@@ -69,7 +65,7 @@ class UserTest {
     @Test
     fun `shouldn't create user when email is already used by other user`() {
         // Given
-        val createUserCmd = USER1.buildCreateUserCmd()
+        val createUserCmd = jeremyTutzo().toCreateUserCmd()
         `when`(helperUserHelper.throwIfEmailIsUsedByOtherUser(createUserCmd.id, createUserCmd.email)).thenThrow(EmailAlreadyUsed())
 
         // Then / When
@@ -82,13 +78,12 @@ class UserTest {
     @Test
     fun `should update user`() {
         // Given
-        val createUserCmd = USER1.buildCreateUserCmd()
-        val updateUserCmd = USER1
-                .rebuild(username = "jeremy.bg")
-                .rebuild(email = "jbg@email.com")
-                .rebuild(teamId = UUID.fromString("814442e2-3d15-11e9-b210-d663bd873d93"))
-                .buildUpdateUserCmd()
-        doNothing().`when`(helperUserHelper).throwIfUsernameIsUsedByOtherUser(createUserCmd.id, createUserCmd.username)
+        val createUserCmd = jeremyTutzo().toCreateUserCmd()
+        val updateUserCmd = jeremyTutzo().apply {
+            username = "jeremy.bg"
+            email = "jbg@email.com"
+            teamId = UUID.fromString("814442e2-3d15-11e9-b210-d663bd873d93")
+        }.todUpdateUserCmd()
 
         // Then / When
         fixture.given(createUserCmd.buildEvent())
@@ -106,12 +101,12 @@ class UserTest {
     @Test
     fun `shouldn't update user when username is already used by other user`() {
         // Given
-        val createUserCmd = USER1.buildCreateUserCmd()
-        val updateUserCmd = USER1
-                .rebuild(username = "jeremy.bg")
-                .rebuild(email = "jbg@email.com")
-                .rebuild(teamId = UUID.fromString("814442e2-3d15-11e9-b210-d663bd873d93"))
-                .buildUpdateUserCmd()
+        val createUserCmd = jeremyTutzo().toCreateUserCmd()
+        val updateUserCmd = jeremyTutzo().apply {
+            username = "jeremy.bg"
+            email = "jbg@email.com"
+            teamId = UUID.fromString("814442e2-3d15-11e9-b210-d663bd873d93")
+        }.todUpdateUserCmd()
         `when`(helperUserHelper.throwIfUsernameIsUsedByOtherUser(updateUserCmd.id, updateUserCmd.username)).thenThrow(UsernameAlreadyUsed())
 
         // Then / When
@@ -124,12 +119,12 @@ class UserTest {
     @Test
     fun `shouldn't update user when email is already used by other user`() {
         // Given
-        val createUserCmd = USER1.buildCreateUserCmd()
-        val updateUserCmd = USER1
-                .rebuild(username = "jeremy.bg")
-                .rebuild(email = "jbg@email.com")
-                .rebuild(teamId = UUID.fromString("814442e2-3d15-11e9-b210-d663bd873d93"))
-                .buildUpdateUserCmd()
+        val createUserCmd = jeremyTutzo().toCreateUserCmd()
+        val updateUserCmd = jeremyTutzo().apply {
+            username = "jeremy.bg"
+            email = "jbg@email.com"
+            teamId = UUID.fromString("814442e2-3d15-11e9-b210-d663bd873d93")
+        }.todUpdateUserCmd()
         `when`(helperUserHelper.throwIfEmailIsUsedByOtherUser(updateUserCmd.id, updateUserCmd.email)).thenThrow(EmailAlreadyUsed())
 
         // Then / When
@@ -150,7 +145,7 @@ class UserHelperTest {
     private lateinit var userHelper: UserHelper
 
     @Before
-    fun init() {
+    fun setup() {
         MockitoAnnotations.initMocks(this)
         userHelper = UserHelper(userReadRepository)
     }
@@ -158,13 +153,13 @@ class UserHelperTest {
     @Test
     fun `should throw UsernameAlreadyUsed exception when the username is used for other user`() {
         // Given
-        `when`(userReadRepository.findByUsername(USER1.username)).thenReturn(Optional.ofNullable(USER2
-                .rebuild(username = USER1.username)
-                .buildUserProject()))
+        `when`(userReadRepository.findByUsername(jeremyTutzo().username)).thenReturn(Optional.ofNullable(francescaCorbella()
+                .apply { username = jeremyTutzo().username }
+                .toUserProject()))
 
         // When
         val throwable = catchThrowable {
-            userHelper.throwIfUsernameIsUsedByOtherUser(USER1.id, USER1.username)
+            userHelper.throwIfUsernameIsUsedByOtherUser(jeremyTutzo().id, jeremyTutzo().username)
         }
 
         // Then
@@ -175,11 +170,11 @@ class UserHelperTest {
     @Test
     fun `shouldn't throw UsernameAlreadyUsed exception when the username is used by this`() {
         // Given
-        `when`(userReadRepository.findByUsername(USER1.username)).thenReturn(Optional.ofNullable(USER1.buildUserProject()))
+        `when`(userReadRepository.findByUsername(jeremyTutzo().username)).thenReturn(Optional.ofNullable(jeremyTutzo().toUserProject()))
 
         // When
         val throwable = catchThrowable {
-            userHelper.throwIfUsernameIsUsedByOtherUser(USER1.id, USER1.username)
+            userHelper.throwIfUsernameIsUsedByOtherUser(jeremyTutzo().id, jeremyTutzo().username)
         }
 
         // Then
@@ -189,13 +184,13 @@ class UserHelperTest {
     @Test
     fun `should throw EmailAlreadyUsed exception when the email is used for other user`() {
         // Given
-        `when`(userReadRepository.findByEmail(USER1.email)).thenReturn(Optional.ofNullable(USER2
-                .rebuild(email = USER1.email)
-                .buildUserProject()))
+        `when`(userReadRepository.findByEmail(jeremyTutzo().email)).thenReturn(Optional.ofNullable(francescaCorbella()
+                .apply { email = jeremyTutzo().email }
+                .toUserProject()))
 
         // When
         val throwable = catchThrowable {
-            userHelper.throwIfEmailIsUsedByOtherUser(USER1.id, USER1.email)
+            userHelper.throwIfEmailIsUsedByOtherUser(jeremyTutzo().id, jeremyTutzo().email)
         }
 
         // Then
@@ -206,11 +201,11 @@ class UserHelperTest {
     @Test
     fun `shouldn't throw EmailAlreadyUsed exception when the email is used by this`() {
         // Given
-        `when`(userReadRepository.findByEmail(USER1.email)).thenReturn(Optional.ofNullable(USER1.buildUserProject()))
+        `when`(userReadRepository.findByEmail(jeremyTutzo().email)).thenReturn(Optional.ofNullable(jeremyTutzo().toUserProject()))
 
         // When
         val throwable = catchThrowable {
-            userHelper.throwIfEmailIsUsedByOtherUser(USER1.id, USER1.email)
+            userHelper.throwIfEmailIsUsedByOtherUser(jeremyTutzo().id, jeremyTutzo().email)
         }
 
         // Then
@@ -227,7 +222,7 @@ class UserEventHandlerTest {
     private lateinit var userWriteRepository: UserWriteRepository
 
     @Before
-    fun init() {
+    fun setup() {
         MockitoAnnotations.initMocks(this)
         userEventHandler = UserEventHandler(userWriteRepository)
     }
@@ -235,7 +230,7 @@ class UserEventHandlerTest {
     @Test
     fun `should persist user created when UserCreatedEvent is call`() {
         // Given
-        val event = USER1.buildCreateUserCmd().buildEvent()
+        val event = jeremyTutzo().toCreateUserCmd().buildEvent()
 
         // When
         userEventHandler.on(event)
@@ -247,7 +242,7 @@ class UserEventHandlerTest {
     @Test
     fun `should persist user updated when UserUpdatedEvent is call`() {
         // Given
-        val event = USER1.buildUpdateUserCmd().buildEvent()
+        val event = jeremyTutzo().todUpdateUserCmd().buildEvent()
 
         // When
         userEventHandler.on(event)

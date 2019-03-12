@@ -1,10 +1,6 @@
 package com.jtutzo.katasimple.api
 
-import com.jtutzo.katasimple.util.TestService
-import com.jtutzo.katasimple.util.UserTestData.Companion.USER1
-import com.jtutzo.katasimple.util.UserTestData.Companion.USER2
-import com.jtutzo.katasimple.util.buildCreateUserDTO
-import com.jtutzo.katasimple.util.buildToJson
+import com.jtutzo.katasimple.util.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -31,18 +27,18 @@ class UserReadResourceTest {
     private lateinit var mockMvc: MockMvc
 
     @Autowired
-    private lateinit var testService: TestService
+    private lateinit var userTestService: UserTestService
 
     private val url = "/users"
 
     @Before
     fun setup() {
-        testService.createUsers(USER1, USER2)
+        userTestService.createUsers(jeremyTutzo(), francescaCorbella())
     }
 
     @After
     fun reset() {
-        testService.deleteAll()
+        userTestService.deleteAll()
     }
 
     @Test
@@ -51,16 +47,16 @@ class UserReadResourceTest {
         mockMvc.perform(get(url))
                 .andExpect(status().isOk)
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(content().json(testService.toUserProjectionsJson(USER1, USER2)))
+                .andExpect(content().json(userTestService.toUserProjectionsJson(jeremyTutzo(), francescaCorbella())))
     }
 
     @Test
     fun `should 200 when get user by id`() {
         // When / Then
-        mockMvc.perform(get("$url/${USER2.id}"))
+        mockMvc.perform(get("$url/${francescaCorbella().id}"))
                 .andExpect(status().isOk)
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(content().json(testService.toUserProjectionJson(USER2)))
+                .andExpect(content().json(userTestService.toUserProjectionJson(francescaCorbella())))
 
     }
 
@@ -84,23 +80,23 @@ class UserWriteResourceTest {
     private lateinit var mockMvc: MockMvc
 
     @Autowired
-    private lateinit var testService: TestService
+    private lateinit var userTestService: UserTestService
 
     private val url = "/users"
 
     @After
     fun reset() {
-        testService.deleteAll()
+        userTestService.deleteAll()
     }
 
     @Test
     fun `should 201 when create an user`() {
         // Given
-        val createUserDTO = USER1.buildCreateUserDTO()
+        val createUserDTO = jeremyTutzo().toCreateUserDTO()
 
         // When / Then
         mockMvc.perform(post(url)
-                .content(createUserDTO.buildToJson())
+                .content(createUserDTO.toJson())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated)
     }

@@ -1,8 +1,6 @@
 package com.jtutzo.katasimple.provider
 
 import com.jtutzo.katasimple.util.*
-import com.jtutzo.katasimple.util.UserTestData.Companion.USER1
-import com.jtutzo.katasimple.util.UserTestData.Companion.USER2
 import org.assertj.core.api.Assertions.assertThat
 import org.flywaydb.core.Flyway
 import org.jooq.impl.DSL
@@ -18,7 +16,7 @@ class UserWriteRepositoryTest {
 
     private lateinit var userReadRepository: JooqUserReadRepository
 
-    private lateinit var testService: TestService
+    private lateinit var userTestService: UserTestService
 
     companion object {
 
@@ -37,82 +35,83 @@ class UserWriteRepositoryTest {
         flyway.migrate()
         userReadRepository = JooqUserReadRepository(dsl)
         userWriteRepository = JooqUserWriteRepository(dsl)
-        testService = TestService(userWriteRepository)
+        userTestService = UserTestService(userWriteRepository)
     }
 
     @After
     fun reset() {
-        testService.deleteAll()
+        userTestService.deleteAll()
     }
 
     @Test
     fun `should create user in db`() {
         // Given
-        val evt = USER1.buildUserCreatedEvent()
+        val evt = jeremyTutzo().toUserCreatedEvent()
 
         // When
         userWriteRepository.create(evt)
 
         // When
-        assertThat(userReadRepository.findById(evt.id)).isEqualTo(Optional.of(USER1.buildUserProject()))
+        assertThat(userReadRepository.findById(evt.id)).isEqualTo(Optional.of(jeremyTutzo().toUserProject()))
     }
 
     @Test
     fun `should update user in db`() {
         // Given
-        testService.createUsers(USER1)
-        val userToUpdate = USER1
-                .rebuild(username = USER2.username)
-                .rebuild(email = USER2.email)
-        val userUpdatedEvt = userToUpdate.buildUserUpdatedEvent()
+        userTestService.createUsers(jeremyTutzo())
+        val userToUpdate = jeremyTutzo().apply {
+            username = francescaCorbella().username
+            email = francescaCorbella().email
+        }
+        val userUpdatedEvt = userToUpdate.toUserUpdatedEvent()
 
         // Then
         userWriteRepository.update(userUpdatedEvt)
 
         // When
-        assertThat(userReadRepository.findById(userUpdatedEvt.id)).isEqualTo(Optional.of(userToUpdate.buildUserProject()))
+        assertThat(userReadRepository.findById(userUpdatedEvt.id)).isEqualTo(Optional.of(userToUpdate.toUserProject()))
     }
 
     @Test
     fun `should find by username`() {
         // Given
-        testService.createUsers(USER1, USER2)
+        userTestService.createUsers(jeremyTutzo(), francescaCorbella())
 
         // Then
-        val result = userReadRepository.findByUsername(USER1.username)
+        val result = userReadRepository.findByUsername(jeremyTutzo().username)
 
         // When
-        assertThat(result).isEqualTo(Optional.of(USER1.buildUserProject()))
+        assertThat(result).isEqualTo(Optional.of(jeremyTutzo().toUserProject()))
     }
 
     @Test
     fun `should find by email`() {
         // Given
-        testService.createUsers(USER1, USER2)
+        userTestService.createUsers(jeremyTutzo(), francescaCorbella())
 
         // Then
-        val result = userReadRepository.findByEmail(USER2.email)
+        val result = userReadRepository.findByEmail(francescaCorbella().email)
 
         // When
-        assertThat(result).isEqualTo(Optional.of(USER2.buildUserProject()))
+        assertThat(result).isEqualTo(Optional.of(francescaCorbella().toUserProject()))
     }
 
     @Test
     fun `should find by id`() {
         // Given
-        testService.createUsers(USER1, USER2)
+        userTestService.createUsers(jeremyTutzo(), francescaCorbella())
 
         // Then
-        val result = userReadRepository.findById(USER2.id)
+        val result = userReadRepository.findById(francescaCorbella().id)
 
         // When
-        assertThat(result).isEqualTo(Optional.of(USER2.buildUserProject()))
+        assertThat(result).isEqualTo(Optional.of(francescaCorbella().toUserProject()))
     }
 
     @Test
     fun `should delete all users`() {
         // Given
-        testService.createUsers(USER1, USER1)
+        userTestService.createUsers(jeremyTutzo(), francescaCorbella())
 
         // Then
         userWriteRepository.deleteAll()
@@ -124,13 +123,13 @@ class UserWriteRepositoryTest {
     @Test
     fun `should find all users`() {
         // Given
-        testService.createUsers(USER1, USER2)
+        userTestService.createUsers(jeremyTutzo(), francescaCorbella())
 
         // Then
         val result = userReadRepository.findAll()
 
         // When
-        assertThat(result).containsExactly(USER1.buildUserProject(), USER2.buildUserProject())
+        assertThat(result).containsExactly(jeremyTutzo().toUserProject(), francescaCorbella().toUserProject())
     }
 
 }
