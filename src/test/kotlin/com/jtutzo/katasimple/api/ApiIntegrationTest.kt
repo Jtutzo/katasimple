@@ -43,7 +43,7 @@ class UserReadResourceTest {
 
     @Test
     fun `should 200 when get all users`() {
-        // When/ Then
+        // When / Then
         mockMvc.perform(get(url))
                 .andExpect(status().isOk)
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
