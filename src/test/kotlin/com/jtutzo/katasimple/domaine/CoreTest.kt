@@ -33,20 +33,20 @@ class UserTest {
     fun `should create user`() {
         // Given
         val createUserCmd = jeremyTutzo().toCreateUserCmd()
-        doNothing().`when`(helperUserHelper).throwIfUsernameIsUsedByOtherUser(createUserCmd.id, createUserCmd.username)
 
-        // Then / When
-        fixture.givenNoPriorActivity()
-                .`when`(createUserCmd)
-                .expectSuccessfulHandlerExecution()
-                .expectEvents(createUserCmd.buildEvent())
-                .expectState {
-                    it.isEqualsTo(
-                            id = createUserCmd.id,
-                            username = createUserCmd.username,
-                            email = createUserCmd.email,
-                            teamId = createUserCmd.teamId)
-                }
+        // When
+        val result = fixture.givenNoPriorActivity().`when`(createUserCmd)
+
+        // Then
+        result.expectSuccessfulHandlerExecution()
+        result.expectEvents(createUserCmd.buildEvent())
+        result.expectState {
+            it.isEqualsTo(
+                    id = createUserCmd.id,
+                    username = createUserCmd.username,
+                    email = createUserCmd.email,
+                    teamId = createUserCmd.teamId)
+        }
     }
 
     @Test
@@ -55,11 +55,12 @@ class UserTest {
         val createUserCmd = jeremyTutzo().toCreateUserCmd()
         `when`(helperUserHelper.throwIfUsernameIsUsedByOtherUser(createUserCmd.id, createUserCmd.username)).thenThrow(UsernameAlreadyUsed())
 
-        // Then / When
-        fixture.givenNoPriorActivity()
-                .`when`(createUserCmd)
-                .expectException(UsernameAlreadyUsed::class.java)
-                .expectExceptionMessage("Username is already used.")
+        // When
+        val result = fixture.givenNoPriorActivity().`when`(createUserCmd)
+
+        // Then
+        result.expectException(UsernameAlreadyUsed::class.java)
+        result.expectExceptionMessage("Username is already used.")
     }
 
     @Test
@@ -68,11 +69,12 @@ class UserTest {
         val createUserCmd = jeremyTutzo().toCreateUserCmd()
         `when`(helperUserHelper.throwIfEmailIsUsedByOtherUser(createUserCmd.id, createUserCmd.email)).thenThrow(EmailAlreadyUsed())
 
-        // Then / When
-        fixture.givenNoPriorActivity()
-                .`when`(createUserCmd)
-                .expectException(EmailAlreadyUsed::class.java)
-                .expectExceptionMessage("Email is already used.")
+        // When
+        val result = fixture.givenNoPriorActivity().`when`(createUserCmd)
+
+        // Then
+        result.expectException(EmailAlreadyUsed::class.java)
+        result.expectExceptionMessage("Email is already used.")
     }
 
     @Test
@@ -83,19 +85,20 @@ class UserTest {
             username = "jeremy.bg"
             email = "jbg@email.com"
             teamId = UUID.fromString("814442e2-3d15-11e9-b210-d663bd873d93")
-        }.todUpdateUserCmd()
+        }.toUpdateUserCmd()
 
-        // Then / When
-        fixture.given(createUserCmd.buildEvent())
-                .`when`(updateUserCmd)
-                .expectSuccessfulHandlerExecution()
-                .expectEvents(updateUserCmd.buildEvent())
-                .expectState {
-                    it.isEqualsTo(
-                            username = updateUserCmd.username,
-                            email = updateUserCmd.email,
-                            teamId = updateUserCmd.teamId)
-                }
+        // When
+        val result = fixture.given(createUserCmd.buildEvent()).`when`(updateUserCmd)
+
+        // Then
+        result.expectSuccessfulHandlerExecution()
+        result.expectEvents(updateUserCmd.buildEvent())
+        result.expectState {
+            it.isEqualsTo(
+                    username = updateUserCmd.username,
+                    email = updateUserCmd.email,
+                    teamId = updateUserCmd.teamId)
+        }
     }
 
     @Test
@@ -106,14 +109,15 @@ class UserTest {
             username = "jeremy.bg"
             email = "jbg@email.com"
             teamId = UUID.fromString("814442e2-3d15-11e9-b210-d663bd873d93")
-        }.todUpdateUserCmd()
+        }.toUpdateUserCmd()
         `when`(helperUserHelper.throwIfUsernameIsUsedByOtherUser(updateUserCmd.id, updateUserCmd.username)).thenThrow(UsernameAlreadyUsed())
 
-        // Then / When
-        fixture.given(createUserCmd.buildEvent())
-                .`when`(updateUserCmd)
-                .expectException(UsernameAlreadyUsed::class.java)
-                .expectExceptionMessage("Username is already used.")
+        // When
+        val result = fixture.given(createUserCmd.buildEvent()).`when`(updateUserCmd)
+
+        // Then
+        result.expectException(UsernameAlreadyUsed::class.java)
+        result.expectExceptionMessage("Username is already used.")
     }
 
     @Test
@@ -124,14 +128,15 @@ class UserTest {
             username = "jeremy.bg"
             email = "jbg@email.com"
             teamId = UUID.fromString("814442e2-3d15-11e9-b210-d663bd873d93")
-        }.todUpdateUserCmd()
+        }.toUpdateUserCmd()
         `when`(helperUserHelper.throwIfEmailIsUsedByOtherUser(updateUserCmd.id, updateUserCmd.email)).thenThrow(EmailAlreadyUsed())
 
-        // Then / When
-        fixture.given(createUserCmd.buildEvent())
-                .`when`(updateUserCmd)
-                .expectException(EmailAlreadyUsed::class.java)
-                .expectExceptionMessage("Email is already used.")
+        // When
+        val result = fixture.given(createUserCmd.buildEvent()).`when`(updateUserCmd)
+
+        // Then
+        result.expectException(EmailAlreadyUsed::class.java)
+        result.expectExceptionMessage("Email is already used.")
     }
 
 }
@@ -242,7 +247,7 @@ class UserEventHandlerTest {
     @Test
     fun `should persist user updated when UserUpdatedEvent is call`() {
         // Given
-        val event = jeremyTutzo().todUpdateUserCmd().buildEvent()
+        val event = jeremyTutzo().toUpdateUserCmd().buildEvent()
 
         // When
         userEventHandler.on(event)

@@ -21,7 +21,7 @@ fun UserTestEntity.toUserProject(): UserProjection = UserProjection(this.id, thi
 
 fun UserTestEntity.toCreateUserCmd(): CreateUserCommand = CreateUserCommand(this.id, this.username, this.email)
 
-fun UserTestEntity.todUpdateUserCmd(): UpdateUserCommand = UpdateUserCommand(this.id, this.username, this.email, this.teamId)
+fun UserTestEntity.toUpdateUserCmd(): UpdateUserCommand = UpdateUserCommand(this.id, this.username, this.email, this.teamId)
 
 fun UserTestEntity.toUserCreatedEvent(): UserCreatedEvent = UserCreatedEvent(this.id, this.username, this.email, this.teamId)
 
