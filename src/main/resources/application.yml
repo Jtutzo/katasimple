@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:~/katasimple;DB_CLOSE_DELAY=-1
+    username: katasimple
+    password: katasimple
+  flyway:
+    schemas: PUBLIC
+    baseline-on-migrate: true
+
+  jooq:
+    sql-dialect: h2
+  h2:
+    console:
+      enabled: true
