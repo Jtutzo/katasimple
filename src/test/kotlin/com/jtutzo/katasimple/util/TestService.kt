@@ -1,12 +1,11 @@
 package com.jtutzo.katasimple.util
 
-import com.jtutzo.katasimple.domaine.UserReadRepository
 import com.jtutzo.katasimple.domaine.UserWriteRepository
 import org.springframework.stereotype.Service
 import javax.inject.Inject
 
 @Service
-class TestService @Inject constructor(private val userWriteRepository: UserWriteRepository, private val userReadRepository: UserReadRepository) {
+class TestService @Inject constructor(private val userWriteRepository: UserWriteRepository) {
 
     fun createUsers(vararg users: UserTestData) {
         users.map { userWriteRepository.create(it.buildUserCreatedEvent()) }
